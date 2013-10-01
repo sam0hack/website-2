@@ -1,1 +1,0 @@
-/home/www/html/tips/check.cgi

@@ -1,0 +1,45 @@
+form {
+    width: 600px;
+    margin: 0 auto;
+    padding-bottom: 1em;
+    /* overflow: hidden; */
+}
+
+textarea {
+  height: 10em;
+}
+
+#input {
+    width: 100%;
+}
+
+#columns {
+    overflow: auto;
+    margin-bottom: 1em;
+}
+
+#left {
+  float: left;
+  margin-right: 1em;
+}
+
+#center {
+  float: left;
+}
+
+#right {
+  float: right;
+}
+
+#submit_button {
+    margin-left: 1em;
+    margin-bottom: 2em;
+    overflow: visible;
+    float: right;
+}
+
+#instructions {
+    clear: both;
+    margin: 0 auto;
+    width: 80%;
+}

@@ -231,7 +231,7 @@ while ($arr = mysql_fetch_row($rs)) {
     if ($post_date != $edit_date)
         print " (Edited: $edit_date)";
 ?>
-    <a href="post.php?id=<?php print $article_id ?>" style="float: right">Edit</a>
+    <a href="/tips/post.php?id=<?php print $article_id ?>" style="float: right">Edit</a>
     <hr>
     </div>
 <?php

@@ -107,13 +107,18 @@ else {
 <li><a href="/apps">Apps</a></li>
 <?php
 }
+
+if (isset($user_config['logo_location']))
+    $logo_location = $user_config['logo_location'];
+else
+    $logo_location = "/";
 ?>
 <li style="float: right"><a href="mailto:nigorojr@gmail.com">Contact</a></li>
 </ul>
 </nav>
 
 <div id="header">
-<a href="/"><img src="<?php print $logo ?>" width="686" height="200" alt="NigoroJr Logo"></a>
+<a href="<?php print $logo_location ?>"><img src="<?php print $logo ?>" width="686" height="200" alt="NigoroJr Logo"></a>
 </div>
 
 

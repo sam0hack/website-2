@@ -37,6 +37,19 @@ if ($config_file) {
     fclose($config_file_handle);
 }
 
+if (isset($user_config['stylesheet']))
+    $stylesheet = $user_config['stylesheet'];
+else
+    $stylesheet = "/styles/style.css";
+
+if (isset($user_config['additional_stylesheet']))
+    $additional_stylesheet = $user_config['additional_stylesheet'];
+
+if (isset($user_config['logo']))
+    $logo = $user_config['logo'];
+else
+    $logo = "/images/Logo.png";
+
 # TODO: When changing file name, also change .htaccess
 $file_handle = fopen("db.txt", "r");
 $db_username = rtrim(fgets($file_handle));
@@ -52,7 +65,14 @@ mysql_query("set names utf8");
 <head>
 <meta http-equiv="content-type" content="text/html" charset="utf-8">
 <title>Tips</title>
-<link rel="stylesheet" href="/styles/style.css" type="text/css" charset="utf-8">
+<link rel="stylesheet" href="<?php print $stylesheet ?>" type="text/css" charset="utf-8">
+<?php
+if (isset($additional_stylesheet)) {
+?>
+<link rel="stylesheet" href="<?php print $additional_stylesheet ?>" type="text/css" charset="utf-8">
+<?php
+}
+?>
 <link rel="shortcut icon" href="/images/favicon.ico">
 <!-- highlight.js -->
 <link rel="stylesheet" href="/styles/highlight.js/styles/<?php
@@ -93,7 +113,7 @@ else {
 </nav>
 
 <div id="header">
-<a href="/"><img src="/images/Logo.png" width="686" height="200" alt="NigoroJr Logo"></a>
+<a href="/"><img src="<?php print $logo ?>" width="686" height="200" alt="NigoroJr Logo"></a>
 </div>
 
 
@@ -181,7 +201,6 @@ while ($arr = mysql_fetch_row($rs)) {
         $language = $arr[8];
 ?>
     <div class="contents">
-    <!-- Add href to /$author/tips/$content_file (without the trailing ".md") -->
     <h1><a id="title" href="index.php?id=<?php print $article_id ?>"><?php print $title ?></a></h1>
     <p><?php
     # "nohl" at the beginning of a code block means no syntax highlighting

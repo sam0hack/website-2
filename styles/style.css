@@ -93,6 +93,33 @@ body {
     margin-left: 2em;
 }
 
+#tags {
+    margin-left: 1em;
+    margin-bottom: 10px;
+}
+
+.tag {
+    padding: 3px 5px;
+    margin: 5;
+    background-color: #bfd5ff;
+    color: #294173;
+    border-radius: 3px;
+    border-right: 2px solid #9aacd2;
+    border-bottom: 2px solid #9aacd2;
+}
+
+#tags a:link {
+    text-decoration: none;
+}
+
+#tags a:visited {
+    text-decoration: none;
+}
+
+#tags a:hover {
+    background-color: #9aacd2;
+}
+
 .contents h1 {
     margin-top: 20px;
 }

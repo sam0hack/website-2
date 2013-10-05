@@ -8,8 +8,44 @@ spl_autoload_register(function($class){
 set_include_path(get_include_path() . PATH_SEPARATOR . "/home/naoki/Src/php-markdown/");
 
 # Get Markdown class
-use \Michelf\Markdown;
+use \Michelf\MarkdownExtra;
 
+# Read in personal configurations
+$config_file = glob("*.config")[0];
+if ($config_file) {
+    # Extract Username from file name
+    $username = explode(".", $config_file)[0];
+    $user_config['username'] = $username;
+    $config_file_handle = fopen($config_file, "r");
+    while (($line = fgets($config_file_handle)) != false) {
+        # Lines starting from '#' will be skipped
+        if (substr($line, 0, 1) == "#")
+            continue;
+        $delimiter_pos = strpos($line, ":");
+        $param = substr($line, 0, $delimiter_pos);
+        $value = substr($line, $delimiter_pos + 1);
+
+        # If the param is 'nav'
+        if ($param == "nav") {
+            $name = explode(",", $value)[0];
+            $location = explode(",", $value)[1];
+            $user_config[$param][$name] = $location;
+        }
+        else
+            $user_config[$param] = $value;
+    }
+    fclose($config_file_handle);
+}
+
+# TODO: When changing file name, also change .htaccess
+$file_handle = fopen("db.txt", "r");
+$db_username = rtrim(fgets($file_handle));
+$db_password = rtrim(fgets($file_handle));
+fclose($file_handle);
+# Connect to Database
+$db = mysql_connect("localhost", "$db_username", "$db_password");
+mysql_select_db("NigoroJr", $db);
+mysql_query("set names utf8");
 ?>
 <!DOCTYPE html>
 <html>
@@ -19,63 +55,94 @@ use \Michelf\Markdown;
 <link rel="stylesheet" href="/styles/style.css" type="text/css" charset="utf-8">
 <link rel="shortcut icon" href="/images/favicon.ico">
 <!-- highlight.js -->
-<link rel="stylesheet" href="/styles/highlight.js/styles/github.css">
+<link rel="stylesheet" href="/styles/highlight.js/styles/<?php
+# Check if user wants a specific stylesheet for syntax highlighting
+if (isset($user_config['highlight.js']))
+    print $user_config['highlight.js'];
+else
+    print "github";
+?>.css">
 <script src="/styles/highlight.js/highlight.pack.js"></script>
 <script>
 hljs.tabReplace = '    ';
 hljs.initHighlightingOnLoad();
 </script>
-<?php
-// TODO: When changing file name, also change .htaccess
-$file_handle = fopen("db.txt", 'r');
-$db_username = rtrim(fgets($file_handle));
-$db_password = rtrim(fgets($file_handle));
-fclose($file_handle);
-/* Connect to Database */
-$db = mysql_connect("localhost", "$db_username", "$db_password");
-mysql_select_db("NigoroJr", $db);
-mysql_query("set names utf8");
-?>
 </head>
 
 <body>
 <nav id="nav">
-  <ul>
-    <li><a href="/tips">Tips</a></li>
-    <li><a href="/apps">Apps</a></li>
-    <li><a href="http://nigorojr.com:3000">Torch</a></li>
-    <li style="float: right"><a href="mailto:nigorojr@gmail.com">Contact</a></li>
-  </ul>
+<ul>
+<?php
+# Prints what the user wants on the nav. Default if nothing specified.
+if (isset($user_config['nav'])) {
+    foreach (array_keys($user_config['nav']) as $key) {
+?>
+<li><a href="<?php print $user_config['nav'][$key] ?>"><?php print $key ?></a></li>
+<?php
+    }
+}
+else {
+?>
+<li><a href="/tips">Tips</a></li>
+<li><a href="/apps">Apps</a></li>
+<?php
+}
+?>
+<li style="float: right"><a href="mailto:nigorojr@gmail.com">Contact</a></li>
+</ul>
 </nav>
 
 <div id="header">
-  <a href="/">
-    <img src="/images/Logo.png" width="686" height="200" alt="NigoroJr Logo">
-  </a>
+<a href="/"><img src="/images/Logo.png" width="686" height="200" alt="NigoroJr Logo"></a>
 </div>
 
 
 <div id="my_body">
-    <div id="contents_wrapper">
+  <div id="contents_wrapper">
     <div id="main_contents">
 
 <?php
+if (isset($user_config['article_per_page']))
+    $article_per_page = $user_config['article_per_page'];
+else
+    $article_per_page = 5;
+
+# The variable $category will be overwritten later when loading articles
+if (isset($user_config['category']))
+    $category = $user_config['category'];
+else
+    $category = "tips";
+
 $id = $_GET['id'];
-$article_per_page = 5;
+$tag = $_GET['tag'];
+
 if (isset($_GET['page']))
     $page = $_GET['page'];
 else
     $page = 1;
 $offset = ($page - 1) * $article_per_page;
-/* Print all the contents from the database */
-$whole_articles_query = mysql_query("select * from articles where category = 'tips' order by date desc");
-// Depending on the parameter, change query
-if (isset($id))
-    $rs = mysql_query("select * from articles where id = $id");
-else
-    $rs = mysql_query("select * from articles where category = 'tips' order by date desc limit $article_per_page offset $offset");
 
-// When no article or false is returned.
+$query_beginning = "select * from articles where";
+$whole_articles_query = mysql_query("$query_beginning category = '$category' order by date desc");
+# Depending on the parameter, change query
+if (isset($id))
+    $rs = mysql_query("$query_beginning id = $id");
+# Search for tag includes comma to prevent unwanted matching
+else if (isset($tag))
+    $rs = mysql_query("$query_beginning tags regexp '(^|,)([[:blank:]]*($tag)[[:blank:]]*)(,|$)'");
+# If there's a user specified query_condition
+else if (isset($user_config['query_condition'])) {
+    $user_query = $user_config['query_condition'];
+    # Add category condition if it's specified
+    if (isset($user_config['category']))
+        $user_query .= "category = '" . $user_config['category'] . "'";
+    $rs = mysql_query("$query_beginning $user_query order by date desc limit $article_per_page offset $offset");
+}
+# Print all the contents from the database
+else
+    $rs = mysql_query("$query_beginning category = '$category' order by date desc limit $article_per_page offset $offset");
+
+# When no article or false is returned.
 if (!$rs or mysql_num_rows($rs) == 0) {
     print "<h1 style=\"text-align: center\">No such article!</h1>";
     return;
@@ -83,36 +150,56 @@ if (!$rs or mysql_num_rows($rs) == 0) {
 while ($arr = mysql_fetch_row($rs)) {
     $article_id = $arr[0];
     $title = $arr[1];
-    $title = Markdown::defaultTransform($title);
+    $title = MarkdownExtra::defaultTransform($title);
     $content_file = $arr[2];
     $content = file_get_contents($content_file);
-    $converted = Markdown::defaultTransform($content);
+    $converted = MarkdownExtra::defaultTransform($content);
     $post_date = $arr[3];
     $edit_date = $arr[4];
-    // This is just the raw username in Linux. Use table "authors" to convert 
-    // them to a "screen name" that would actually be displayed.
+    # This is just the raw username in Linux. Use table "authors" to convert 
+    # them to a "screen name" that would actually be displayed.
     $author = $arr[5];
     $author_query_result = mysql_query("select screen_name from authors where author = '$author'");
+
+    # Screen name will be overwritten if there's a user-specified screen 
+    # name in the config file
     $screen_name = mysql_result($author_query_result, 0);
-    if ($screen_name == "")
+    if ($author == $username and isset($user_config['screen_name']))
+        $screen_name = $user_config['screen_name'];
+    else if ($screen_name == "")
         $screen_name = $author;
-    // Category is always "tips" in this case
-    // $category = $arr[6];
-    // Tags should be separated by ","s
+
+    # This overwrites the previously set $category in a non-related way
+    $category = $arr[6];
+    # Tags should be separated by ","s. Leading and tailing spaces will be trimmed
     $tags = array_map('trim', explode(",", $arr[7]));
-    $language = $arr[8];
+
+    # Use specified language if any
+    if (isset($user_config['language']))
+        $language = $user_config['language'];
+    else
+        $language = $arr[8];
 ?>
     <div class="contents">
     <!-- Add href to /$author/tips/$content_file (without the trailing ".md") -->
     <h1><a id="title" href="index.php?id=<?php print $article_id ?>"><?php print $title ?></a></h1>
     <p><?php
-    /* "nohl" at the beginning of a code block means no syntax highlighting */
-    $converted = str_replace('<code>nohl ', '<code class="no-highlight">', $converted);
-    $converted = str_replace('<code>nohl', '<code class="no-highlight">', $converted);
-    /* '<code>lang: java ' should become '<code class="java">' */
+    # "nohl" at the beginning of a code block means no syntax highlighting
+    $converted = preg_replace('/<code>nohl ?/', '<code class="no-highlight">', $converted);
+    # '<code>lang: java ' should become '<code class="java">'
     $converted = preg_replace('/<code>lang(?:uage)?\:\s*(.*?) /', '<code class="$1"> ', $converted);
     print $converted;
 ?></p>
+    <div id="tags">
+<?php
+    # Show tags
+    foreach ($tags as $tag) {
+?>
+        <a class="tag" href="index.php?tag=<?php print $tag ?>"><?php print $tag?></a>
+<?php
+    }
+?>
+    </div>
 <?php
     print "Posted by <a href=\"/$author\">$screen_name</a>: " . $post_date;
     if ($post_date != $edit_date)
@@ -122,14 +209,14 @@ while ($arr = mysql_fetch_row($rs)) {
     <hr>
     </div>
 <?php
-}   // End of while loop (one article)
+}   # End of while loop (one article)
 ?>
     <div id="change_page">
 <?php
-    // Only display when it's not a 1-article page (when no id is set)
+    # Only display when it's not a 1-article page (when no id is set)
     if ($page > 1 and !isset($id)) {
 ?>
-        <a style="float: left" href="index.php<?php if ($page != 2) print "?page=" . ($page - 1) ?>">&lt;&nbsp;Prev</a>
+    <a style="float: left" href="index.php<?php if ($page != 2) print "?page=" . ($page - 1) ?>">&lt;&nbsp;Prev</a>
 <?php
     }
     else
@@ -138,7 +225,7 @@ while ($arr = mysql_fetch_row($rs)) {
     <a href="/tips">Tips</a>
 <?php
 
-    // Only display when it's not a 1-article page (when no id is set)
+    # Only display when it's not a 1-article page (when no id is set)
     if ($page < (mysql_num_rows($whole_articles_query) / $article_per_page)  and !isset($id)) {
 ?>
         <a style="float: right" href="index.php?page=<?php print $page + 1 ?>">Next&nbsp;&gt;</a>
@@ -152,14 +239,14 @@ while ($arr = mysql_fetch_row($rs)) {
 <br><br>
     <a style="float: right; list-style: none;" href="post.php">Post</a>
 
-        </div>
-      </div>
-
-      <div id="footer">
-        <div id="copyright">
-          Copyright (C) 2013 NigoroJr.com All Rights Reserved
-        </div>
-      </div>
     </div>
-  </body>
+  </div><!-- End of contents wrapper -->
+
+  <div id="footer">
+    <div id="copyright">
+    Copyright (C) 2013 NigoroJr.com All Rights Reserved
+    </div>
+  </div>
+</div>
+</body>
 </html>

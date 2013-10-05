@@ -143,7 +143,6 @@ else
 $offset = ($page - 1) * $article_per_page;
 
 $query_beginning = "select * from articles where";
-$whole_articles_query = mysql_query("$query_beginning category = '$category' order by date desc");
 # Depending on the parameter, change query
 if (isset($id))
     $rs = mysql_query("$query_beginning id = $id");
@@ -157,10 +156,13 @@ else if (isset($user_config['query_condition'])) {
     if (isset($user_config['category']))
         $user_query .= "category = '" . $user_config['category'] . "'";
     $rs = mysql_query("$query_beginning $user_query order by date desc limit $article_per_page offset $offset");
+    $articles_without_limit = mysql_query("$query_beginning $user_query order by date desc");
 }
 # Print all the contents from the database
-else
+else {
     $rs = mysql_query("$query_beginning category = '$category' order by date desc limit $article_per_page offset $offset");
+    $articles_without_limit = mysql_query("$query_beginning category = '$category' order by date desc");
+}
 
 # When no article or false is returned.
 if (!$rs or mysql_num_rows($rs) == 0) {
@@ -245,7 +247,7 @@ while ($arr = mysql_fetch_row($rs)) {
 <?php
 
     # Only display when it's not a 1-article page (when no id is set)
-    if ($page < (mysql_num_rows($whole_articles_query) / $article_per_page)  and !isset($id)) {
+    if ($page < (mysql_num_rows($articles_without_limit) / $article_per_page)  and !isset($id)) {
 ?>
         <a style="float: right" href="index.php?page=<?php print $page + 1 ?>">Next&nbsp;&gt;</a>
 <?php

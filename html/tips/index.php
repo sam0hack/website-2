@@ -237,7 +237,7 @@ while ($arr = mysql_fetch_row($rs)) {
     </div>
     <!-- Improve the link!! -->
 <br><br>
-    <a style="float: right; list-style: none;" href="post.php">Post</a>
+    <a style="float: right; list-style: none;" href="/tips/post.php">Post</a>
 
     </div>
   </div><!-- End of contents wrapper -->

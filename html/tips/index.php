@@ -5,6 +5,11 @@
 # This script looks for a file named db.txt that contains the username and the 
 # password of the database (in 2 lines) and then looks for a file that has the 
 # extension .config for configuration. See the sample config file for usage.
+# If there is at least 1 Markdown file (files that has the extension .md) in 
+# the same directory as this file, it will display the content of the files, 
+# sorted in alphabetical order (since that's the default behavior of glob). 
+# The contents will be converted according to the Markdown rule (duh, it's a 
+# Markdown file) using Michelf's php-markdown module.
 
 # Install PSR-0-compatible class autoloader for Markdown
 spl_autoload_register(function($class){
@@ -56,7 +61,7 @@ if (isset($user_config['logo']))
 else
     $logo = "/images/Logo.png";
 
-# TODO: When changing file name, also change .htaccess
+# Note: When changing file name, also change .htaccess
 $file_handle = fopen("db.txt", "r");
 $db_username = rtrim(fgets($file_handle));
 $db_password = rtrim(fgets($file_handle));
@@ -65,6 +70,10 @@ fclose($file_handle);
 $db = mysql_connect("localhost", "$db_username", "$db_password");
 mysql_select_db("NigoroJr", $db);
 mysql_query("set names utf8");
+
+# Look for Markdown files. If there's at least 1, print them instead of 
+# fetching articles from the database.
+$markdown_files = glob("*.md");
 ?>
 <!DOCTYPE html>
 <html>
@@ -164,6 +173,17 @@ else
     $page = 1;
 $offset = ($page - 1) * $article_per_page;
 
+# *****************************************************
+# If there is at least 1 Markdown file in the current
+# directory, display all
+# *****************************************************
+if ($markdown_files) {
+    foreach ($markdown_files as $markdown_file) {
+        print MarkdownExtra::defaultTransform(file_get_contents($markdown_file));
+        print "<hr>";
+    }
+}
+else {  # Beginning of the huge else block TODO: find another way
 $query_beginning = "select * from articles where";
 # Depending on the parameter, change query
 if (isset($id))
@@ -286,6 +306,9 @@ while ($arr = mysql_fetch_row($rs)) {
     <a style="float: right; list-style: none;" href="/tips/post.php">Post</a>
 
     </div>
+<?php
+}   # End of huge else block TODO: find a better way
+?>
   </div><!-- End of contents wrapper -->
 
   <div id="footer">

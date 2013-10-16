@@ -191,10 +191,15 @@ else if (isset($user_config['query_condition'])) {
     $rs = mysql_query("$query_beginning $user_query order by date desc limit $article_per_page offset $offset");
     $articles_without_limit = mysql_query("$query_beginning $user_query order by date desc");
 }
-# Print all the contents from the database
-else {
+# Print all the contents from the database ONLY IF THERE'S CONNECTION
+else if (isset($db)) {
     $rs = mysql_query("$query_beginning category = '$category' order by date desc limit $article_per_page offset $offset");
     $articles_without_limit = mysql_query("$query_beginning category = '$category' order by date desc");
+}
+else {
+    print "<h1>No connection to database nor files to show</h1>";
+    print "We apologize for the inconvenience. Please contact the website's administrator about this page. Thank you.";
+    return;
 }
 
 # When no article or false is returned.

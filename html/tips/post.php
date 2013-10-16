@@ -138,15 +138,27 @@ else {
             </p>
       </form>
     </div>
-<div id="instructions">
-<h3>Instructions</h3>
-<p><pre class="bash"><code>$ mkdir -p ~/public_html/tips/archives
-$ chmod 777 ~/public_html/tips/archives
-</code></pre></p>
-In order for this to work, you need to have the directory <code>~/public_html/tips/archives/</code> owned by apache, or if it's owned by you, the permission must be writable by others.<br>
-One way to do this is to make the permission of the "tips" directory 777 and post an article. This will allow this script to create a directory named archives with the ownership to apache.<br>
-However, considering you cannot remove/modify the direcoty without superuser privilege, you might want to use the "permission 777 owned by you" method.
-</div>
+    <div id="instructions">
+        <h3>Instructions</h3>
+        <p>
+        <p><pre class="bash"><code>$ mkdir -p ~/public_html/tips/archives
+$ chmod 777 ~/public_html/tips/archives</code></pre></p>
+        In order for this to work, you need to have the directory <code>~/public_html/tips/archives/</code> owned by apache, or if it's owned by you, the permission must be writable by others.<br>
+        One way to do this is to make the permission of the "tips" directory 777 and post an article. This will allow this script to create a directory named archives with the ownership to apache.<br>
+        However, considering you cannot remove/modify the direcoty without superuser privilege, you might want to use the "permission 777 owned by you" method.
+        </p>
+        <h3>Resources</h3>
+        <p>
+            Documentations for the Markdown Syntax can be found at:
+            <br>
+            <a href="http://daringfireball.net/projects/markdown/syntax">http://daringfireball.net/projects/markdown/syntax</a>
+            <br>
+            <a href="http://michelf.ca/projects/php-markdown/extra/">http://michelf.ca/projects/php-markdown/extra/</a>
+            <br>
+            日本語
+            <a href="http://blog.2310.net/archives/6">http://blog.2310.net/archives/6</a>
+        </p>
+    </div>
   </div>
   </div>
 

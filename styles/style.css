@@ -93,6 +93,14 @@ body {
     margin-left: 2em;
 }
 
+#main_contents h1 {
+    margin: 20px 0;
+}
+
+#main_contents hr {
+    margin: 1em 0;
+}
+
 #tags {
     margin-left: 1em;
     margin-bottom: 10px;
@@ -119,10 +127,11 @@ body {
 #tags a:hover {
     background-color: #9aacd2;
 }
-
+/*
 .contents h1 {
     margin-top: 20px;
 }
+*/
 
 code {
     background-color: #eeeeee;

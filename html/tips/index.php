@@ -61,15 +61,17 @@ if (isset($user_config['logo']))
 else
     $logo = "/images/Logo.png";
 
-# Note: When changing file name, also change .htaccess
-$file_handle = fopen("db.txt", "r");
-$db_username = rtrim(fgets($file_handle));
-$db_password = rtrim(fgets($file_handle));
-fclose($file_handle);
-# Connect to Database
-$db = mysql_connect("localhost", "$db_username", "$db_password");
-mysql_select_db("NigoroJr", $db);
-mysql_query("set names utf8");
+if (file_exists("db.txt")) {
+    // Note: When changing file name, also change .htaccess
+    $file_handle = fopen("db.txt", 'r');
+    $db_username = rtrim(fgets($file_handle));
+    $db_password = rtrim(fgets($file_handle));
+    fclose($file_handle);
+    /* Connect to Database */
+    $db = mysql_connect("localhost", "$db_username", "$db_password");
+    mysql_select_db("NigoroJr", $db);
+    mysql_query("set names utf8");
+}
 
 # Look for Markdown files. If there's at least 1, print them instead of 
 # fetching articles from the database.
@@ -102,17 +104,6 @@ else
 hljs.tabReplace = '    ';
 hljs.initHighlightingOnLoad();
 </script>
-<?php
-// Note: When changing file name, also change .htaccess
-$file_handle = fopen("db.txt", 'r');
-$db_username = rtrim(fgets($file_handle));
-$db_password = rtrim(fgets($file_handle));
-fclose($file_handle);
-/* Connect to Database */
-$db = mysql_connect("localhost", "$db_username", "$db_password");
-mysql_select_db("NigoroJr", $db);
-mysql_query("set names utf8");
-?>
 </head>
 
 <body>

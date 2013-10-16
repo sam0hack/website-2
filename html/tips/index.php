@@ -1,5 +1,11 @@
 <?php
 
+# This script is the index.php for NigoroJr.com and the subdirectories of the 
+# website.
+# This script looks for a file named db.txt that contains the username and the 
+# password of the database (in 2 lines) and then looks for a file that has the 
+# extension .config for configuration. See the sample config file for usage.
+
 # Install PSR-0-compatible class autoloader for Markdown
 spl_autoload_register(function($class){
     require preg_replace('{\\\\|_(?!.*\\\\)}', DIRECTORY_SEPARATOR, ltrim($class, '\\')).'.php';
@@ -26,7 +32,7 @@ hljs.tabReplace = '    ';
 hljs.initHighlightingOnLoad();
 </script>
 <?php
-// TODO: When changing file name, also change .htaccess
+// Note: When changing file name, also change .htaccess
 $file_handle = fopen("db.txt", 'r');
 $db_username = rtrim(fgets($file_handle));
 $db_password = rtrim(fgets($file_handle));

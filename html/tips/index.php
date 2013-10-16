@@ -153,7 +153,7 @@ if (isset($id))
     $rs = mysql_query("$query_beginning id = $id");
 # Search for tag includes comma to prevent unwanted matching
 else if (isset($tag))
-    $rs = mysql_query("$query_beginning tags regexp '(^|,)([[:blank:]]*($tag)[[:blank:]]*)(,|$)'");
+    $rs = mysql_query("$query_beginning tags regexp '(^|,)([[:blank:]]*($tag)[[:blank:]]*)(,|$)' order by date desc");
 # If there's a user specified query_condition
 else if (isset($user_config['query_condition'])) {
     $user_query = $user_config['query_condition'];
@@ -252,7 +252,10 @@ while ($arr = mysql_fetch_row($rs)) {
 <?php
 
     # Only display when it's not a 1-article page (when no id is set)
-    if ($page < (mysql_num_rows($articles_without_limit) / $article_per_page)  and !isset($id)) {
+    # Note: Used to be !isset($id) but changed because it would be a long 
+    # condition when there are a lot of kinds of parameter (e.g. tags, id, 
+    # etc.)
+    if (isset($articles_without_limit) and $page < (mysql_num_rows($articles_without_limit) / $article_per_page)) {
 ?>
         <a style="float: right" href="index.php?page=<?php print $page + 1 ?>">Next&nbsp;&gt;</a>
 <?php

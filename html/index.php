@@ -81,7 +81,12 @@ $markdown_files = glob("*.md");
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html" charset="utf-8">
-<title>Tips</title>
+<title><?php
+if (isset($user_config['page_title']))
+    print $user_config['page_title'];
+else
+    print "NigoroJr"
+?></title>
 <link rel="stylesheet" href="<?php print $stylesheet ?>" type="text/css" charset="utf-8">
 <?php
 if (isset($additional_stylesheet)) {

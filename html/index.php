@@ -127,6 +127,8 @@ else {
 ?>
 <li><a href="/tips">Tips</a></li>
 <li><a href="/apps">Apps</a></li>
+<li><a href="/ftp">FTP</a></li>
+<li><a href="/users">Users</a></li>
 <?php
 }
 
